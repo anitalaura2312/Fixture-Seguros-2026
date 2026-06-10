@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fixture Mundial 2026 | BANCOR</title>
+    <!-- Firebase SDK Compat para máxima compatibilidad en un solo archivo -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <style>
         /* Variables Globales */
         :root {
-            /* Colores Base */
             --bancor-cyan: #00b4d8;
             --bancor-orange: #f26236;
             --text-main: #ffffff;
@@ -24,7 +28,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
-        /* FONDO PRINCIPAL MULTICOLOR */
         body { 
             background: linear-gradient(135deg, #c79514 0%, #15a850 45%, #0088cc 80%, #065b9e 100%);
             background-attachment: fixed;
@@ -34,7 +37,6 @@
             padding-bottom: 50px; 
         }
 
-        /* Clases utilitarias para efecto Glassmorphism */
         .glass-panel {
             background-color: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -43,7 +45,6 @@
             border-radius: 16px;
         }
 
-        /* Top Bar */
         .top-bar { padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-radius: 0 0 16px 16px; border-top: none; }
         
         .logo-area { display: flex; align-items: center; gap: 20px; }
@@ -54,16 +55,46 @@
         .site-title p a:hover { background-color: var(--bancor-cyan); color: #000; }
         .site-title h1 { font-size: 1.8em; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); margin-top: 2px; }
         
-        .top-actions { display: flex; gap: 10px; }
+        .top-actions { display: flex; align-items: center; gap: 15px; }
         .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 0.9em; transition: 0.3s; }
         .btn-cyan { background-color: var(--bancor-cyan); color: #000; box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4); }
         .btn-cyan:hover { background-color: #0096b4; transform: translateY(-2px); }
         .btn-dark { background-color: var(--glass-inner); border: 1px solid var(--glass-border); color: white; }
         .btn-dark:hover { background-color: rgba(255,255,255,0.1); }
 
+        /* Botón de Google Login Fundido con la Estética Glassmorphism */
+        .btn-google-login { 
+            background-color: rgba(255, 255, 255, 0.12); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white; 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            cursor: pointer; 
+            font-size: 0.85em; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25); 
+            transition: all 0.25s ease; 
+        }
+        .btn-google-login:hover { 
+            background-color: rgba(255, 255, 255, 0.22); 
+            border-color: rgba(255, 255, 255, 0.45);
+            transform: translateY(-1px); 
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.2);
+        }
+        
+        .user-logged-box { display: flex; align-items: center; gap: 12px; font-size: 0.85em; text-align: right; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--bancor-cyan); }
+        .user-name-display { font-weight: bold; color: var(--bancor-cyan); }
+        .btn-logout-link { background: transparent; border: 1px solid var(--danger-red); color: var(--danger-red); padding: 4px 8px; border-radius: 6px; font-size: 0.8em; cursor: pointer; font-weight: bold; transition: 0.2s; margin-top: 2px; }
+        .btn-logout-link:hover { background-color: var(--danger-red); color: white; }
+
         .container { max-width: 1350px; margin: 0 auto; padding: 0 20px; }
 
-        /* HERO BANNER CON IMAGEN DE COPA2022.JPG FUNDIDA */
         .hero-banner { 
             position: relative;
             overflow: hidden;
@@ -99,7 +130,6 @@
         .progress-box .p-main { display: block; font-size: 1.25em; font-weight: 800; color: var(--bancor-cyan); text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 4px; line-height: 1.2; }
         .progress-box .p-sub { display: block; font-size: 0.85em; font-weight: 500; color: var(--text-main); line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
-        /* BOTONERA DE PRODUCTOS CON ENLACES DINÁMICOS */
         .products-mini-nav { margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
         .products-mini-nav span.nav-label { font-size: 0.85em; color: var(--text-main); text-shadow: 0 1px 2px rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
         .product-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -108,7 +138,6 @@
         
         .p-movilidad { --btn-color: 0, 255, 200; } .p-celular { --btn-color: 255, 200, 0; } .p-ap-bienestar { --btn-color: 180, 120, 255; } .p-cordovida-premium { --btn-color: 100, 255, 120; } .p-cajeros { --btn-color: 255, 150, 50; } .p-compra { --btn-color: 50, 220, 255; } .p-bolso { --btn-color: 180, 130, 255; } .p-ap { --btn-color: 100, 220, 255; } .p-financiera { --btn-color: 100, 150, 255; } .p-sepelio { --btn-color: 50, 255, 180; } .p-urbana { --btn-color: 180, 255, 50; } .p-amparo { --btn-color: 50, 200, 180; } .p-amparo-plus { --btn-color: 50, 255, 220; } .p-cordovida-mujer { --btn-color: 255, 120, 200; } .p-cordovida-total { --btn-color: 255, 140, 50; } .p-cordovida-beneficio { --btn-color: 100, 180, 255; } .p-cordovida-proteccion { --btn-color: 255, 200, 50; } .p-moto { --btn-color: 80, 200, 255; } .p-auto { --btn-color: 50, 220, 220; } .p-hogar { --btn-color: 255, 120, 255; } .p-mascotas { --btn-color: 220, 120, 255; }
 
-        /* TABS NAVEGACIÓN */
         .tabs-nav { display: flex; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--glass-border); margin-bottom: 30px; padding-bottom: 0; }
         .tab { padding: 12px 10px; color: var(--text-main); font-weight: 600; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; gap: 8px; position: relative; transition: 0.3s; border-bottom: 3px solid transparent; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         .tab:hover { color: white; background-color: rgba(255,255,255,0.1); border-radius: 8px 8px 0 0; }
@@ -116,10 +145,8 @@
         .badge-tab { background-color: var(--success-green); color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); text-shadow: none; }
         .badge-tab.cyan { background-color: var(--bancor-cyan); }
 
-        /* LAYOUT PRINCIPAL */
         .main-layout { display: grid; grid-template-columns: 300px 1fr; gap: 30px; align-items: start; }
 
-        /* NAVEGADOR DE GRUPOS */
         .sidebar { display: flex; flex-direction: column; gap: 20px; }
         .nav-panel { padding: 25px; }
         .nav-panel h3 { font-size: 1.3em; margin-bottom: 10px; color: var(--text-main); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
@@ -137,7 +164,6 @@
         .btn-outline { display: block; text-align: center; text-decoration: none; border: 1px solid var(--bancor-cyan); color: var(--text-main); padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.85em; transition: 0.3s; background: rgba(0, 180, 216, 0.2); backdrop-filter: blur(5px); }
         .btn-outline:hover { background-color: var(--bancor-cyan); color: #000; }
 
-        /* PANEL CENTRAL (FIXTURE) */
         .content-panel { padding: 30px; }
         .content-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); padding-bottom: 20px; }
         .content-header-title { display: flex; align-items: center; gap: 20px; }
@@ -151,8 +177,6 @@
         .match-row { background-color: var(--glass-inner); border: 1px solid var(--glass-border); border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .match-info { font-size: 0.75em; color: var(--text-secondary); line-height: 1.6; display: flex; flex-direction: column; width: 45%; }
         .match-info strong { color: var(--text-main); font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        .match-info span { color: var(--text-secondary); }
-        .match-info span i { color: #ef4444; margin-right: 5px; font-style: normal; }
         
         .match-teams { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex: 1; }
         .team-name { font-weight: bold; font-size: 0.95em; width: 110px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
@@ -163,8 +187,7 @@
         .score-container { display: flex; align-items: center; gap: 6px; }
         .score-input { width: 35px; height: 35px; background-color: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); font-size: 1em; font-weight: bold; text-align: center; transition: 0.3s; }
         .score-input:focus { outline: none; border-color: var(--bancor-cyan); box-shadow: 0 0 8px rgba(0, 180, 216, 0.5); background-color: rgba(0,0,0,0.6); }
-        .score-input::-webkit-outer-spin-button, .score-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .score-input[type=number] { -moz-appearance: textfield; }
+        .score-input:disabled { opacity: 0.25; cursor: not-allowed; border-color: transparent; }
         .vs-colon { font-weight: bold; color: var(--text-main); }
 
         .standings-wrapper { display: flex; flex-direction: column; gap: 15px; }
@@ -192,7 +215,6 @@
         .health-text { font-size: 0.75em; color: var(--text-main); line-height: 1.4; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         .health-text strong { color: var(--bancor-cyan); }
 
-        /* VISTAS FINALES */
         #view-16avos, #view-8vos, #view-4tos, #view-semifinal { display: none; }
         .clasificados-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start; }
         
@@ -227,6 +249,12 @@
         .third-table .team-name-col small { color: var(--text-secondary); margin-left: 3px; }
         .row-eliminado td { opacity: 0.6; }
 
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-box { padding: 30px; width: 420px; text-align: center; border: 1px solid var(--glass-border); background-color: var(--glass-bg); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-title { font-size: 1.4em; font-weight: bold; margin-bottom: 15px; color: var(--bancor-cyan); }
+        .modal-msg { font-size: 0.95em; color: var(--text-main); margin-bottom: 25px; line-height: 1.5; }
+        .modal-actions { display: flex; justify-content: center; gap: 15px; }
+
         @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr; } .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } .ad-card { margin-top: 0; } .clasificados-layout { grid-template-columns: 1fr; } }
         @media (max-width: 1024px) { .hero-banner { flex-direction: column; gap: 30px; } .hero-content, .progress-box { max-width: 100%; width: 100%; } .fixture-layout { grid-template-columns: 1fr; } .sidebar { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { .top-bar { flex-direction: column; gap: 15px; text-align: center; } .tabs-nav { flex-wrap: wrap; gap: 10px; justify-content: center; } .match-row { flex-direction: column; align-items: flex-start; gap: 20px; } .match-info { width: 100%; } .match-teams { width: 100%; justify-content: space-between; } .team-name { width: auto; } .content-header { flex-direction: column; gap: 15px; } .groups-grid { grid-template-columns: repeat(2, 1fr); } .groups-cards-grid { grid-template-columns: 1fr; } }
@@ -242,15 +270,18 @@
                 <h1>Fixture Mundial 2026</h1>
             </div>
         </div>
+        
         <div class="top-actions">
-            <button class="btn btn-cyan">⚡ Autocompletar Fixture</button>
-            <button class="btn btn-dark">🔄 Reiniciar</button>
+            <div id="auth-panel">
+                <!-- Se inyecta por JS: Botón de Login con Google (con SVG nativo y glassmorphism) -->
+            </div>
+            <button class="btn btn-cyan" id="btn-autocompletar">⚡ Autocompletar</button>
+            <button class="btn btn-dark" id="btn-reiniciar">🔄 Reiniciar</button>
         </div>
     </header>
 
     <div class="container">
 
-        <!-- HERO BANNER CON IMAGEN DE COPA2022.JPG FUNDIDA -->
         <section class="hero-banner">
             <div class="hero-content">
                 <div class="badge">🛡️ TU TRANQUILIDAD, NUESTRA PRIORIDAD</div>
@@ -267,16 +298,14 @@
             <div class="progress-box">
                 <div class="progress-header">
                     <span>Progreso del Fixture Grupal:</span>
-                    <span>0% Completo</span>
+                    <span id="progress-text">0% Completo</span>
                 </div>
-                <div class="progress-track"><div class="progress-fill" style="width: 0%;"></div></div>
-                <!-- TEXTO SEPARADO Y DESTACADO -->
-                <span class="p-main">0 de 72 partidos cargados</span>
+                <div class="progress-track"><div class="progress-fill" id="progress-bar-fill" style="width: 0%;"></div></div>
+                <span class="p-main" id="progress-matches-summary">0 de 72 partidos cargados</span>
                 <span class="p-sub">Completá los goles para descubrir quién clasifica.</span>
             </div>
         </section>
 
-        <!-- BOTONERA DE PRODUCTOS CON ENLACES DINÁMICOS -->
         <section class="products-mini-nav">
             <div class="product-buttons">
                 <a href="https://www.bancor.com.ar/personas/seguros/proteccion-integral/movilidad/" target="_blank" class="btn-prod p-movilidad">🚲 Movilidad</a>
@@ -303,7 +332,6 @@
             </div>
         </section>
 
-        <!-- TABS DE NAVEGACIÓN -->
         <div class="tabs-nav">
             <div class="tab active" id="tab-fixture">⚽ Fixture (A-L)</div>
             <div class="tab" id="tab-16avos">🏆 16avos de Final <span class="badge-tab">32</span></div>
@@ -312,9 +340,6 @@
             <div class="tab" id="tab-semifinal">⭐ Semi y Final <span class="badge-tab cyan">4</span></div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 1: FIXTURE DE GRUPOS                 -->
-        <!-- ========================================== -->
         <div class="main-layout" id="view-fixture">
             <aside class="sidebar">
                 <div class="nav-panel glass-panel">
@@ -335,9 +360,8 @@
                         <div class="group-btn" data-group="L">Grupo L</div>
                     </div>
                     
-                    <!-- CONSEJO DE MOVILIDAD -->
                     <div class="health-footer" style="margin-top: 20px; padding-top: 20px;">
-                        <div class="health-icon" style="font-size: 2em;">🚲</div>
+                        <div class="health-icon" style="font-size: 2.3em;">🚲</div>
                         <p class="health-text"><strong style="color: var(--bancor-cyan);">Consejo de Movilidad:</strong> Vayas donde vayas a alentar, movete seguro. Protegé tu bici o monopatín con nuestro seguro de <a href="https://www.bancor.com.ar/personas/seguros/proteccion-integral/movilidad/" target="_blank" style="color: var(--bancor-cyan); text-decoration: none; font-weight: bold;">MOVILIDAD</a>.</p>
                     </div>
                 </div>
@@ -377,7 +401,7 @@
                             </table>
                             <div class="health-footer">
                                 <div class="health-icon">❤️</div>
-                                <p class="health-text"><strong>Consejo de Salud BANCOR:</strong> Viví los partidos con alegría, pero cuidá tu corazón. Con <strong>CORDOVIDA TOTAL</strong> tenés cobertura médica de telemedicina gratuita 24hs.</p>
+                                <p class="health-text"><strong>Consejo de Salud BANCOR:</strong> Viví los partidos con alegría, pero cuidá tu corazón. Con <strong>CORDOVIDA TOTAL</strong> tenés cobertura médica de telemedicina de alta complejidad.</p>
                             </div>
                         </div>
                     </div>
@@ -385,9 +409,6 @@
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 2: 16AVOS DE FINAL                   -->
-        <!-- ========================================== -->
         <div class="content-panel glass-panel" id="view-16avos">
             <div class="clasificados-layout">
                 <div class="direct-qualifiers">
@@ -409,22 +430,17 @@
                         </table>
                     </div>
 
-                    <!-- BLOQUE: PROTECCIÓN FINANCIERA (FINANZAS Y DIGITAL) -->
                     <div class="section-header-16 cyan">🪙 Protección Financiera</div>
                     <div class="third-places-card" style="text-align: center; padding: 40px 20px;">
                         <span style="font-size: 3.5em; display:block; margin-bottom:15px; text-shadow: 0 5px 10px rgba(0,0,0,0.5);">🪙</span>
-                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">FINANZAS Y DIGITAL</h4>
-                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Protegé tus cuentas y billeteras virtuales de cualquier imprevisto mientras simulás el Mundial. ¡Tu dinero siempre seguro!</p>
+                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase;">FINANZAS Y DIGITAL</h4>
+                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px;">Protegé tus cuentas y transacciones digitales ante fraudes y estafas virtuales.</p>
                         <a href="https://www.bancor.com.ar/personas/seguros/proteccion-integral/financiera-digital/" target="_blank" class="btn btn-cyan" style="display:inline-block; text-decoration:none;">Ver más coberturas</a>
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 3: 8VOS DE FINAL                     -->
-        <!-- ========================================== -->
         <div class="content-panel glass-panel" id="view-8vos">
             <div class="clasificados-layout">
                 <div class="direct-qualifiers">
@@ -435,17 +451,14 @@
                     <div class="section-header-16 cyan">🩺 Cobertura de Bienestar</div>
                     <div class="third-places-card" style="text-align: center; padding: 40px 20px;">
                         <span style="font-size: 3.5em; display:block; margin-bottom:15px; text-shadow: 0 5px 10px rgba(0,0,0,0.5);">🩺</span>
-                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">AP BIENESTAR CHUBB</h4>
-                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">El respaldo integral que tu vida diaria necesita mientras simulás los mejores resultados del torneo.</p>
+                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase;">AP BIENESTAR CHUBB</h4>
+                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px;">El respaldo integral que tu vida diaria necesita mientras simulás los mejores resultados del torneo.</p>
                         <a href="https://www.bancor.com.ar/personas/seguros/seguro-de-vida/ap-bienestar/" target="_blank" class="btn btn-cyan" style="display:inline-block; text-decoration:none;">Ver más coberturas</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 4: 4TOS DE FINAL                     -->
-        <!-- ========================================== -->
         <div class="content-panel glass-panel" id="view-4tos">
             <div class="clasificados-layout">
                 <div class="direct-qualifiers">
@@ -456,17 +469,14 @@
                     <div class="section-header-16 cyan">🚗 Movilidad Asegurada</div>
                     <div class="third-places-card" style="text-align: center; padding: 40px 20px;">
                         <span style="font-size: 3.5em; display:block; margin-bottom:15px; text-shadow: 0 5px 10px rgba(0,0,0,0.5);">🚗</span>
-                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">SEGURO AUTOMOTOR</h4>
-                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Festejá sin preocupaciones. Protegé tu vehículo ante robo, incendio, granizo y responsabilidad civil en cada caravana.</p>
+                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase;">SEGURO AUTOMOTOR</h4>
+                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px;">Festejá sin preocupaciones. Protegé tu vehículo ante robo, incendio, granizo y responsabilidad civil en cada caravana.</p>
                         <a href="https://www.bancor.com.ar/personas/seguros/vehiculos/automotor/" target="_blank" class="btn btn-cyan" style="display:inline-block; text-decoration:none;">Ver más coberturas</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VISTA 5: SEMIFINAL Y FINAL                 -->
-        <!-- ========================================== -->
         <div class="content-panel glass-panel" id="view-semifinal">
             <div class="clasificados-layout">
                 <div class="direct-qualifiers">
@@ -477,8 +487,8 @@
                     <div class="section-header-16 cyan">📱 Tu Tecnología, a Salvo</div>
                     <div class="third-places-card" style="text-align: center; padding: 40px 20px;">
                         <span style="font-size: 3.5em; display:block; margin-bottom:15px; text-shadow: 0 5px 10px rgba(0,0,0,0.5);">📱</span>
-                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">CELULAR PROTEGIDO</h4>
-                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">¿Se te cayó el celular gritando un gol de la Final? ¡Tranquilo! Cuidá tu equipo ante robos o daños accidentales.</p>
+                        <h4 style="color: var(--bancor-cyan); font-size: 1.2em; margin-bottom: 10px; text-transform: uppercase;">CELULAR PROTEGIDO</h4>
+                        <p style="color: var(--text-main); font-size: 0.85em; line-height: 1.6; margin-bottom: 20px;">¿Se te cayó el celular gritando un gol de la Final? ¡Tranquilo! Cuidá tu equipo ante robos o daños accidentales.</p>
                         <a href="https://www.bancor.com.ar/personas/seguros/proteccion-integral/celular-protegido/" target="_blank" class="btn btn-cyan" style="display:inline-block; text-decoration:none;">Ver más coberturas</a>
                     </div>
                 </div>
@@ -487,8 +497,51 @@
 
     </div>
 
-    <!-- SCRIPT DE INTERACTIVIDAD -->
-    <script>
+    <!-- MODAL POPUPS PERSONALIZADOS -->
+    <div class="modal-overlay" id="custom-alert-modal">
+        <div class="modal-box glass-panel">
+            <div class="modal-title" id="custom-alert-title">Notificación</div>
+            <div class="modal-msg" id="custom-alert-msg">Mensaje informativo.</div>
+            <div class="modal-actions">
+                <button class="btn btn-cyan" id="custom-alert-btn-ok">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="custom-confirm-modal">
+        <div class="modal-box glass-panel">
+            <div class="modal-title" id="custom-confirm-title">¿Estás seguro?</div>
+            <div class="modal-msg" id="custom-confirm-msg">Esta acción no se puede deshacer.</div>
+            <div class="modal-actions">
+                <button class="btn btn-cyan" id="custom-confirm-btn-yes">Sí, continuar</button>
+                <button class="btn btn-dark" id="custom-confirm-btn-no">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // CONFIGURACIÓN DE FIREBASE (¡Reemplazar aquí!)
+        // Copia y pega las credenciales que obtuviste en el Paso 3.
+        const firebaseConfig = {
+  		apiKey: "AIzaSyCZe51K1kvIUhphn3t6AK1ARQ_DSX19Vow",
+  		authDomain: "fixture2026-558ac.firebaseapp.com",
+  		projectId: "fixture2026-558ac",
+ 		storageBucket: "fixture2026-558ac.firebasestorage.app",
+  		messagingSenderId: "118602770451",
+  		appId: "1:118602770451:web:21cb330bdfba76518f77e6",
+  		measurementId: "G-863TBNRPRN"
+        };
+
+        // Inicializar Firebase Compat
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(app);
+        const db = firebase.firestore(app);
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        let currentUser = null;
+        let userFixtureData = {};
+        let selectedGroup = 'J';
+
         const allGroupsData = {
             A: [ {name: 'EEUU', code: 'US'}, {name: 'Alemania', code: 'DE'}, {name: 'Nigeria', code: 'NG'}, {name: 'Japón', code: 'JP'} ],
             B: [ {name: 'Canadá', code: 'CA'}, {name: 'Francia', code: 'FR'}, {name: 'Colombia', code: 'CO'}, {name: 'Surcorea', code: 'KR'} ],
@@ -508,24 +561,24 @@
             const t = allGroupsData[groupLetter];
             if (groupLetter === 'J') {
                 return [
-                    { f1: 'Martes 16 de Junio • 22:00 (ARG)', f2: 'Kansas City Stadium', t1: t[0].name, c1: t[0].code, t2: t[1].name, c2: t[1].code },
-                    { f1: 'Miércoles 17 de Junio • 01:00 (ARG)', f2: 'San Francisco Bay Area', t1: t[2].name, c1: t[2].code, t2: t[3].name, c2: t[3].code },
-                    { f1: 'Lunes 22 de Junio • 14:00 (ARG)', f2: 'Dallas Stadium', t1: t[0].name, c1: t[0].code, t2: t[2].name, c2: t[2].code },
-                    { f1: 'Martes 23 de Junio • 00:00 (ARG)', f2: 'San Francisco Bay Area', t1: t[3].name, c1: t[3].code, t2: t[1].name, c2: t[1].code },
-                    { f1: 'Sábado 27 de Junio • 23:00 (ARG)', f2: 'Dallas Stadium', t1: t[3].name, c1: t[3].code, t2: t[0].name, c2: t[0].code },
-                    { f1: 'Sábado 27 de Junio • 23:00 (ARG)', f2: 'Kansas City Stadium', t1: t[1].name, c1: t[1].code, t2: t[2].name, c2: t[2].code }
+                    { id: 'J_1', f1: 'Martes 16 de Junio • 22:00 (ARG)', f2: 'Kansas City Stadium', t1: t[0].name, c1: t[0].code, t2: t[1].name, c2: t[1].code },
+                    { id: 'J_2', f1: 'Miércoles 17 de Junio • 01:00 (ARG)', f2: 'San Francisco Bay Area', t1: t[2].name, c1: t[2].code, t2: t[3].name, c2: t[3].code },
+                    { id: 'J_3', f1: 'Lunes 22 de Junio • 14:00 (ARG)', f2: 'Dallas Stadium', t1: t[0].name, c1: t[0].code, t2: t[2].name, c2: t[2].code },
+                    { id: 'J_4', f1: 'Martes 23 de Junio • 00:00 (ARG)', f2: 'San Francisco Bay Area', t1: t[3].name, c1: t[3].code, t2: t[1].name, c2: t[1].code },
+                    { id: 'J_5', f1: 'Sábado 27 de Junio • 23:00 (ARG)', f2: 'Dallas Stadium', t1: t[3].name, c1: t[3].code, t2: t[0].name, c2: t[0].code },
+                    { id: 'J_6', f1: 'Sábado 27 de Junio • 23:00 (ARG)', f2: 'Kansas City Stadium', t1: t[1].name, c1: t[1].code, t2: t[2].name, c2: t[2].code }
                 ];
             }
             const groupIndex = groupLetter.charCodeAt(0) - 65; 
             const startDay = 11 + Math.floor(groupIndex / 2); 
             const stadiums = ["MetLife Stadium", "Hard Rock Stadium", "SoFi Stadium", "AT&T Stadium", "Mercedes-Benz Stadium", "Estadio Azteca"];
             return [
-                { f1: `Fecha 1 • ${startDay} de Junio • 16:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[0].name, c1: t[0].code, t2: t[1].name, c2: t[1].code },
-                { f1: `Fecha 1 • ${startDay} de Junio • 19:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[2].name, c1: t[2].code, t2: t[3].name, c2: t[3].code },
-                { f1: `Fecha 2 • ${startDay + 5} de Junio • 15:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[0].name, c1: t[0].code, t2: t[2].name, c2: t[2].code },
-                { f1: `Fecha 2 • ${startDay + 5} de Junio • 18:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[3].name, c1: t[3].code, t2: t[1].name, c2: t[1].code },
-                { f1: `Fecha 3 • ${startDay + 10} de Junio • 17:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[3].name, c1: t[3].code, t2: t[0].name, c2: t[0].code },
-                { f1: `Fecha 3 • ${startDay + 10} de Junio • 17:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[1].name, c1: t[1].code, t2: t[2].name, c2: t[2].code }
+                { id: `${groupLetter}_1`, f1: `Fecha 1 • ${startDay} de Junio • 16:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[0].name, c1: t[0].code, t2: t[1].name, c2: t[1].code },
+                { id: `${groupLetter}_2`, f1: `Fecha 1 • ${startDay} de Junio • 19:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[2].name, c1: t[2].code, t2: t[3].name, c2: t[3].code },
+                { id: `${groupLetter}_3`, f1: `Fecha 2 • ${startDay + 5} de Junio • 15:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[0].name, c1: t[0].code, t2: t[2].name, c2: t[2].code },
+                { id: `${groupLetter}_4`, f1: `Fecha 2 • ${startDay + 5} de Junio • 18:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[3].name, c1: t[3].code, t2: t[1].name, c2: t[1].code },
+                { id: `${groupLetter}_5`, f1: `Fecha 3 • ${startDay + 10} de Junio • 17:00 (ARG)`, f2: stadiums[groupIndex % 6], t1: t[3].name, c1: t[3].code, t2: t[0].name, c2: t[0].code },
+                { id: `${groupLetter}_6`, f1: `Fecha 3 • ${startDay + 10} de Junio • 17:00 (ARG)`, f2: stadiums[(groupIndex + 3) % 6], t1: t[1].name, c1: t[1].code, t2: t[2].name, c2: t[2].code }
             ];
         }
 
@@ -536,7 +589,46 @@
         const groupIcon = document.getElementById('group-icon');
         const standingsTitle = document.getElementById('standings-title');
 
+        function showCustomAlert(title, message) {
+            document.getElementById('custom-alert-title').innerText = title;
+            document.getElementById('custom-alert-msg').innerText = message;
+            const modal = document.getElementById('custom-alert-modal');
+            modal.style.display = 'flex';
+            
+            const handleOk = () => {
+                modal.style.display = 'none';
+                document.getElementById('custom-alert-btn-ok').removeEventListener('click', handleOk);
+            };
+            document.getElementById('custom-alert-btn-ok').addEventListener('click', handleOk);
+        }
+
+        function showCustomConfirm(title, message, callback) {
+            document.getElementById('custom-confirm-title').innerText = title;
+            document.getElementById('custom-confirm-msg').innerText = message;
+            const modal = document.getElementById('custom-confirm-modal');
+            modal.style.display = 'flex';
+            
+            const handleYes = () => {
+                modal.style.display = 'none';
+                cleanup();
+                callback(true);
+            };
+            const handleNo = () => {
+                modal.style.display = 'none';
+                cleanup();
+                callback(false);
+            };
+            const cleanup = () => {
+                document.getElementById('custom-confirm-btn-yes').removeEventListener('click', handleYes);
+                document.getElementById('custom-confirm-btn-no').removeEventListener('click', handleNo);
+            };
+
+            document.getElementById('custom-confirm-btn-yes').addEventListener('click', handleYes);
+            document.getElementById('custom-confirm-btn-no').addEventListener('click', handleNo);
+        }
+
         function renderGroup(groupLetter) {
+            selectedGroup = groupLetter;
             const teams = allGroupsData[groupLetter];
             const matches = getMatches(groupLetter);
 
@@ -553,30 +645,196 @@
 
             matchContainer.innerHTML = '';
             matches.forEach(m => {
+                const savedScore = userFixtureData[m.id] || { s1: '', s2: '' };
+                const isOff = currentUser ? '' : 'disabled';
+                
                 matchContainer.innerHTML += `
                     <div class="match-row">
                         <div class="match-info"><strong>${m.f1}</strong><span><i>📍</i> ${m.f2}</span></div>
                         <div class="match-teams">
                             <span class="team-name team-left">${m.t1} <span>${m.c1}</span></span>
                             <div class="score-container">
-                                <input type="number" class="score-input" min="0" placeholder="-">
+                                <input type="number" class="score-input in-g1" data-id="${m.id}" min="0" value="${savedScore.s1}" placeholder="-" ${isOff}>
                                 <span class="vs-colon">:</span>
-                                <input type="number" class="score-input" min="0" placeholder="-">
+                                <input type="number" class="score-input in-g2" data-id="${m.id}" min="0" value="${savedScore.s2}" placeholder="-" ${isOff}>
                             </div>
                             <span class="team-name team-right"><span>${m.c2}</span> ${m.t2}</span>
                         </div>
                     </div>`;
             });
 
+            matchContainer.querySelectorAll('.match-row').forEach(row => {
+                const i1 = row.querySelector('.in-g1');
+                const i2 = row.querySelector('.in-g2');
+                const mid = i1.dataset.id;
+                
+                const saveTrigger = () => { saveMatchScore(mid, i1.value, i2.value); };
+                i1.addEventListener('blur', saveTrigger);
+                i2.addEventListener('blur', saveTrigger);
+            });
+
+            calculateAndRenderStandings(groupLetter, teams, matches);
+        }
+
+        function calculateAndRenderStandings(groupLetter, teams, matches) {
+            let stats = {};
+            teams.forEach(t => {
+                stats[t.name] = { code: t.code, name: t.name, pj: 0, gf: 0, gc: 0, df: 0, pts: 0 };
+            });
+
+            matches.forEach(m => {
+                const saved = userFixtureData[m.id];
+                if (saved && saved.s1 !== "" && saved.s2 !== "") {
+                    const g1 = parseInt(saved.s1);
+                    const g2 = parseInt(saved.s2);
+
+                    stats[m.t1].pj++;
+                    stats[m.t2].pj++;
+                    stats[m.t1].gf += g1;
+                    stats[m.t1].gc += g2;
+                    stats[m.t2].gf += g2;
+                    stats[m.t2].gc += g1;
+
+                    if (g1 > g2) {
+                        stats[m.t1].pts += 3;
+                    } else if (g1 < g2) {
+                        stats[m.t2].pts += 3;
+                    } else {
+                        stats[m.t1].pts += 1;
+                        stats[m.t2].pts += 1;
+                    }
+                }
+            });
+
+            let sortedTeams = Object.values(stats).sort((a, b) => {
+                const dfA = a.gf - a.gc;
+                const dfB = b.gf - b.gc;
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (dfB !== dfA) return dfB - dfA;
+                return b.gf - a.gf;
+            });
+
             standingsBody.innerHTML = '';
             const rowClasses = ['row-direct', 'row-direct', 'row-third', 'row-out'];
-            teams.forEach((team, index) => {
+            sortedTeams.forEach((t, index) => {
+                const df = t.gf - t.gc;
                 standingsBody.innerHTML += `
                     <tr class="${rowClasses[index]}">
-                        <td class="team-cell"><span class="rank">${index + 1}</span> <span class="country-code">${team.code}</span> ${team.name}</td>
-                        <td>0</td><td>0</td><td>0</td>
+                        <td class="team-cell">
+                            <span class="rank">${index + 1}</span> 
+                            <span class="country-code">${t.code}</span> ${t.name}
+                        </td>
+                        <td>${t.pj}</td>
+                        <td>${df > 0 ? '+' + df : df}</td>
+                        <td style="font-weight: bold;">${t.pts}</td>
                     </tr>`;
             });
+        }
+
+        async function saveMatchScore(matchId, s1, s2) {
+            if (!currentUser) return;
+            
+            if (s1 === "" || s2 === "") {
+                delete userFixtureData[matchId];
+            } else {
+                userFixtureData[matchId] = { s1: parseInt(s1), s2: parseInt(s2) };
+            }
+
+            await db.collection("users_fixtures").doc(currentUser.uid).set({
+                goles: userFixtureData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            updateProgressBar();
+            const activeBtn = document.querySelector('.group-btn.active');
+            if (activeBtn) renderGroup(activeBtn.getAttribute('data-group'));
+        }
+
+        // LOGICA DE SESIÓN CON EL BOTÓN GLASSMORPHISM
+        auth.onAuthStateChanged(async (user) => {
+            const authPanel = document.getElementById('auth-panel');
+            if (user) {
+                currentUser = user;
+                authPanel.innerHTML = `
+                    <div class="user-logged-box">
+                        <img src="${user.photoURL || 'https://www.w3schools.com/howto/img_avatar.png'}" class="user-avatar" alt="Avatar">
+                        <div>
+                            <div>¡Hola, <span class="user-name-display">${user.displayName}</span>!</div>
+                            <button class="btn-logout-link" id="btn-logout">Cerrar Sesión</button>
+                        </div>
+                    </div>`;
+                document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
+
+                const docRef = db.collection("users_fixtures").doc(user.uid);
+                const docSnap = await docRef.get();
+                if (docSnap.exists) {
+                    userFixtureData = docSnap.data().goles || {};
+                } else {
+                    userFixtureData = {};
+                }
+            } else {
+                currentUser = null;
+                userFixtureData = {};
+                // Botón con logo vectorial para que no falle jamás
+                authPanel.innerHTML = `
+                    <button class="btn-google-login" id="btn-login-google">
+                        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" style="display:block;">
+                            <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84a4.14 4.14 0 0 1-1.8 2.71v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.6z"/>
+                            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.2l-2.91-2.26c-.8.54-1.83.88-3.05.88-2.34 0-4.33-1.57-5.03-3.69H.95v2.33C2.43 15.89 5.48 18 9 18z"/>
+                            <path fill="#FBBC05" d="M3.97 10.73A5.41 5.41 0 0 1 3.68 9c0-.6.1-1.19.29-1.73V4.93H.95A8.99 8.99 0 0 0 0 9c0 1.5.38 2.91 1.05 4.16l2.92-2.43z"/>
+                            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.1C13.46.7 11.43 0 9 0 5.48 0 2.43 2.11.95 5.27l2.92 2.26c.7-2.12 2.69-3.95 5.13-3.95z"/>
+                        </svg>
+                        Iniciar sesión con Google
+                    </button>`;
+                document.getElementById('btn-login-google').addEventListener('click', () => auth.signInWithPopup(provider));
+            }
+            renderGroup(selectedGroup);
+            updateProgressBar();
+        });
+
+        document.getElementById('btn-autocompletar').addEventListener('click', async () => {
+            if (!currentUser) {
+                showCustomAlert("Ingreso requerido", "Por favor, inicia sesión con Google para usar el simulador inteligente.");
+                return;
+            }
+            const matches = getMatches(selectedGroup);
+            for (let m of matches) {
+                const s1 = Math.floor(Math.random() * 4);
+                const s2 = Math.floor(Math.random() * 4);
+                userFixtureData[m.id] = { s1, s2 };
+            }
+
+            await db.collection("users_fixtures").doc(currentUser.uid).set({
+                goles: userFixtureData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            renderGroup(selectedGroup);
+            updateProgressBar();
+        });
+
+        document.getElementById('btn-reiniciar').addEventListener('click', async () => {
+            if (!currentUser) return;
+            showCustomConfirm("Reiniciar fixture", "¿Estás seguro de que deseas limpiar todo tu fixture cargado en la nube?", async (confirmed) => {
+                if (confirmed) {
+                    userFixtureData = {};
+                    await db.collection("users_fixtures").doc(currentUser.uid).set({
+                        goles: {}
+                    });
+                    renderGroup(selectedGroup);
+                    updateProgressBar();
+                }
+            });
+        });
+
+        function updateProgressBar() {
+            const total = 72;
+            const filled = Object.keys(userFixtureData).filter(key => userFixtureData[key] && userFixtureData[key].s1 !== "" && userFixtureData[key].s2 !== "").length;
+            const percentage = Math.round((filled / total) * 100);
+
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `${percentage}% Completo`;
+            document.getElementById('progress-matches-summary').innerText = `${filled} de ${total} partidos cargados`;
         }
 
         const groupBtns = document.querySelectorAll('.group-btn');
@@ -588,9 +846,6 @@
             });
         });
 
-        // ==========================================
-        // SPA NAVIGATION
-        // ==========================================
         const tabs = {
             fixture: document.getElementById('tab-fixture'),
             class16: document.getElementById('tab-16avos'),
@@ -616,52 +871,34 @@
         }
 
         tabs.fixture.addEventListener('click', () => switchView('fixture'));
+        tabs.class16.addEventListener('click', () => { switchView('class16'); render16avosView(); });
         
-        tabs.class16.addEventListener('click', () => {
-            switchView('class16');
-            render16avosView();
-        });
-
         tabs.octavos.addEventListener('click', () => {
             switchView('octavos');
-            const matches8 = [
+            const m8 = [
                 { date: '4 de Jul', time: '14:00', venue: 'Philadelphia Stadium' }, { date: '4 de Jul', time: '18:00', venue: 'Houston Stadium' },
                 { date: '5 de Jul', time: '15:00', venue: 'New York / NJ Stadium' }, { date: '5 de Jul', time: '19:00', venue: 'Estadio Azteca' },
                 { date: '6 de Jul', time: '16:00', venue: 'Dallas Stadium' }, { date: '6 de Jul', time: '20:00', venue: 'Seattle Stadium' },
                 { date: '7 de Jul', time: '15:00', venue: 'Atlanta Stadium' }, { date: '7 de Jul', time: '19:00', venue: 'BC Place Vancouver' }
             ];
-            renderKnockoutView('8vos-cards-grid', matches8, 'LLAVE DE 8VOS');
+            renderKnockoutView('8vos-cards-grid', m8, '8VOS');
         });
 
         tabs.cuartos.addEventListener('click', () => {
             switchView('cuartos');
-            const matches4 = [
+            const m4 = [
                 { date: '9 de Jul', time: '18:00', venue: 'Boston Stadium' }, { date: '10 de Jul', time: '19:00', venue: 'Los Angeles Stadium' },
                 { date: '11 de Jul', time: '15:00', venue: 'Miami Stadium' }, { date: '11 de Jul', time: '20:00', venue: 'Kansas City Stadium' }
             ];
-            renderKnockoutView('4tos-cards-grid', matches4, 'LLAVE DE 4TOS');
+            renderKnockoutView('4tos-cards-grid', m4, '4TOS');
         });
-
-        tabs.semis.addEventListener('click', () => {
-            switchView('semis');
-            renderSemisView('semis-cards-grid');
-        });
-
-        const tercerosData = [
-            { g: 'A', name: 'Nigeria', code: 'NG' }, { g: 'B', name: 'Colombia', code: 'CO' },
-            { g: 'C', name: 'Egipto', code: 'EG' }, { g: 'D', name: 'Uruguay', code: 'UY' },
-            { g: 'E', name: 'Ecuador', code: 'EC' }, { g: 'F', name: 'Camerún', code: 'CM' },
-            { g: 'G', name: 'C. Marfil', code: 'CI' }, { g: 'H', name: 'Ghana', code: 'GH' },
-            { g: 'I', name: 'Malí', code: 'ML' }, { g: 'J', name: 'Austria', code: 'AT' },
-            { g: 'K', name: 'Sudáfrica', code: 'ZA' }, { g: 'L', name: 'Túnez', code: 'TN' }
-        ];
+        
+        tabs.semis.addEventListener('click', () => { switchView('semis'); renderSemisView('semis-cards-grid'); });
 
         function render16avosView() {
             const gridGrupos = document.getElementById('clasificados-grid');
             const matchGrid = document.getElementById('16avos-matches-grid');
-            const thirdTable = document.getElementById('terceros-body');
-            
-            gridGrupos.innerHTML = ''; thirdTable.innerHTML = ''; matchGrid.innerHTML = '';
+            gridGrupos.innerHTML = ''; matchGrid.innerHTML = '';
 
             Object.keys(allGroupsData).forEach(g => {
                 const t = allGroupsData[g];
@@ -669,16 +906,16 @@
                     <div class="group-card">
                         <div class="g-card-name">GRUPO ${g}</div>
                         <div class="g-card-teams">
-                            <div><span class="icon-crown">👑</span> <strong>${t[0].code}</strong> <span>${t[0].name}</span> <span>(0 pts)</span></div>
-                            <div><span class="icon-medal">🥈</span> <strong>${t[1].code}</strong> <span>${t[1].name}</span> <span>(0 pts)</span></div>
+                            <div>👑 <strong>${t[0].code}</strong> <span>${t[0].name}</span></div>
+                            <div>🥈 <strong>${t[1].code}</strong> <span>${t[1].name}</span></div>
                         </div>
                     </div>`;
             });
 
-            const matches16 = [
-                { date: '28 de Jun', time: '13:00', venue: 'Los Angeles Stadium' }, { date: '28 de Jun', time: '17:00', venue: 'Estadio Azteca' },
+            const m16 = [
+                { date: '28 de Jun', time: '13:00', venue: 'Los Angeles' }, { date: '28 de Jun', time: '17:00', venue: 'Estadio Azteca' },
                 { date: '29 de Jun', time: '14:00', venue: 'Boston Stadium' }, { date: '29 de Jun', time: '18:00', venue: 'Estadio Monterrey' },
-                { date: '29 de Jun', time: '21:00', venue: 'Houston Stadium' }, { date: '30 de Jun', time: '13:30', venue: 'New York / NJ Stadium' },
+                { date: '29 de Jun', time: '21:00', venue: 'Houston Stadium' }, { date: '30 de Jun', time: '13:30', venue: 'MetLife Stadium' },
                 { date: '30 de Jun', time: '17:30', venue: 'Dallas Stadium' }, { date: '30 de Jun', time: '20:00', venue: 'Estadio Guadalajara' },
                 { date: '1 de Jul', time: '14:00', venue: 'Atlanta Stadium' }, { date: '1 de Jul', time: '18:00', venue: 'San Francisco Bay Area' },
                 { date: '1 de Jul', time: '21:00', venue: 'Seattle Stadium' }, { date: '2 de Jul', time: '14:00', venue: 'Toronto Stadium' },
@@ -686,7 +923,7 @@
                 { date: '3 de Jul', time: '15:00', venue: 'Miami Stadium' }, { date: '3 de Jul', time: '19:00', venue: 'Kansas City Stadium' }
             ];
             
-            matches16.forEach((m, i) => {
+            m16.forEach((m, i) => {
                 matchGrid.innerHTML += `
                     <div class="group-card cyan-hover">
                         <div class="g-card-name">
@@ -701,26 +938,18 @@
                         </div>
                     </div>`;
             });
-
-            tercerosData.forEach((item, index) => {
-                const isClassified = index < 8;
-                thirdTable.innerHTML += `
-                    <tr class="${isClassified ? '' : 'row-eliminado'}">
-                        <td class="team-name-col">${index + 1} &nbsp;&nbsp; <strong>${item.code}</strong> <span>${item.name}</span> <small>(${item.g})</small></td>
-                        <td>0</td><td>0</td>
-                        <td><span class="${isClassified ? 'status-clasifica' : 'status-eliminado'}">${isClassified ? 'Clasifica' : 'Eliminado'}</span></td>
-                    </tr>`;
-            });
+            
+            const thirdTable = document.getElementById('terceros-body');
+            thirdTable.innerHTML = '<tr><td class="team-name-col"><strong>NG</strong> Nigeria (A)</td><td>0</td><td>0</td><td><span class="status-clasifica">Clasifica</span></td></tr>';
         }
 
-        function renderKnockoutView(gridId, matchesArray, prefixTitle) {
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = '';
-            matchesArray.forEach((m, i) => {
+        function renderKnockoutView(gridId, arrayMatches, title) {
+            const grid = document.getElementById(gridId); grid.innerHTML = '';
+            arrayMatches.forEach((m, i) => {
                 grid.innerHTML += `
                     <div class="group-card cyan-hover">
                         <div class="g-card-name">
-                            ${prefixTitle} ${i + 1}
+                            LLAVE ${title} ${i + 1}
                             <span style="display:block; font-size:0.85em; color:var(--text-main); font-weight:normal; margin-top:5px; line-height:1.4; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
                                 📅 <span style="color:var(--bancor-cyan)">${m.date}</span> &nbsp; ⏰ <span style="color:var(--bancor-cyan)">${m.time}</span> <br>📍 ${m.venue}
                             </span>
