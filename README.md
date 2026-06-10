@@ -1,0 +1,1 @@
+Tu herramienta definitiva para seguir la máxima cita deportiva. Encuentra y organiza todos los encuentros de fútbol por fecha, hora exacta y estadio donde se jugará cada partido. Además, descubre de manera integrada los productos y servicios de seguros de Bancor para proteger cada aspecto de tu vida durante el torneo y el año.
